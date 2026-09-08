@@ -1,0 +1,16 @@
+import {svgGroup,svgNode,svgText,setAttrs,positive,finite,pathPoints,fmt,mathColors as C} from './svg-helpers.mjs';
+export function solidModel({kind='cuboid',width=3,depth=2,height=4,radius=2,origin=[400,420],unit=60}={}){
+ positive([width,depth,height,radius,unit]);finite(origin);if(origin.length!==2||!['cuboid','cylinder','cone','sphere'].includes(kind))throw new RangeError('Supported solid and 2D origin required');
+ const metrics=kind==='cuboid'?{volume:width*depth*height,surfaceArea:2*(width*depth+width*height+depth*height)}:kind==='cylinder'?{volume:Math.PI*radius*radius*height,surfaceArea:2*Math.PI*radius*(height+radius)}:kind==='cone'?{volume:Math.PI*radius*radius*height/3,surfaceArea:Math.PI*radius*(radius+Math.hypot(radius,height))}:{volume:4*Math.PI*radius**3/3,surfaceArea:4*Math.PI*radius**2};
+ const project=([x,y,z])=>[origin[0]+unit*(x+z*.45),origin[1]-unit*(y+z*.3)];
+ const vertices=kind==='cuboid'?[[0,0,0],[width,0,0],[width,height,0],[0,height,0],[0,0,depth],[width,0,depth],[width,height,depth],[0,height,depth]].map(project):[];
+ return{kind,width,depth,height,radius,unit,origin,vertices,project,...metrics};
+}
+export function createSolid(layer,options={}){let state={...options},model;const group=svgGroup(layer,options.id??'solid'),front=svgNode(group,'path',{stroke:C.purple,'stroke-width':3}),hidden=svgNode(group,'path',{stroke:C.purple,'stroke-dasharray':'7 6','stroke-opacity':.65}),aux=svgNode(group,'path',{stroke:C.red,'stroke-dasharray':'7 5'}),radiusLine=svgNode(group,'path',{stroke:C.green}),labels=[svgText(group,'',C.green),svgText(group,'',C.red),svgText(group,'',C.gold)];
+ function update(next={}){const candidate={...state,...next},m=solidModel(candidate);state=candidate;model=m;let d='',back='',a='',rad='',texts=[];const[oX,oY]=m.origin,r=m.radius*m.unit,h=m.height*m.unit,ry=r*.28;
+ if(m.kind==='cuboid'){const p=m.vertices;d=[[0,1],[1,2],[2,3],[3,0],[3,7],[7,6],[6,2],[6,5],[5,1]].map(([a,b])=>pathPoints([p[a],p[b]])).join(' ');back=[[0,4],[4,5],[4,7]].map(([a,b])=>pathPoints([p[a],p[b]])).join(' ');texts=[[`a = ${fmt(m.width)}`,(p[0][0]+p[1][0])/2,oY+34],[`h = ${fmt(m.height)}`,p[2][0]+64,(p[1][1]+p[2][1])/2],[`b = ${fmt(m.depth)}`,p[5][0]+55,(p[5][1]+p[1][1])/2+12]];
+ }else{const ellipse=(cy,start,end)=>pathPoints(Array.from({length:41},(_,i)=>{const t=start+(end-start)*i/40;return[oX+r*Math.cos(t),cy+ry*Math.sin(t)]}));
+ if(m.kind==='sphere'){d=`M${oX-r} ${oY}A${r} ${r} 0 1 0 ${oX+r} ${oY}A${r} ${r} 0 1 0 ${oX-r} ${oY} `+ellipse(oY,0,Math.PI);back=ellipse(oY,Math.PI,2*Math.PI);rad=pathPoints([[oX,oY],[oX+r,oY]]);texts=[[`r = ${fmt(m.radius)}`,oX+r/2,oY-26]];
+ }else{d=ellipse(oY,0,Math.PI)+(m.kind==='cylinder'?' '+ellipse(oY-h,0,2*Math.PI)+` M${oX-r} ${oY}V${oY-h}M${oX+r} ${oY}V${oY-h}`:` M${oX-r} ${oY}L${oX} ${oY-h}L${oX+r} ${oY}`);back=ellipse(oY,Math.PI,2*Math.PI);rad=pathPoints([[oX+r,oY],[oX,oY]]);a=pathPoints([[oX,oY],[oX,oY-h]]);texts=[[`r = ${fmt(m.radius)}`,oX+r/2,oY+ry+28],[`h = ${fmt(m.height)}`,oX-65,oY-h/2]];}}
+ setAttrs(front,{d});setAttrs(hidden,{d:back});setAttrs(aux,{d:a});setAttrs(radiusLine,{d:rad});labels.forEach((n,i)=>{setAttrs(n,{display:texts[i]?'inline':'none'});if(texts[i]){n.textContent=texts[i][0];setAttrs(n,{x:texts[i][1],y:texts[i][2]})}});return m;}update();return{group,front,hidden,labels,update,get model(){return model}};
+}

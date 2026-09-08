@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>三角形 · 交互预览</title>
+<style>
+:root {
+  --math-bg:#0B151C;
+  --math-white:#F3F5F7;
+  --math-muted:#AAB6C2;
+  --math-a:#55DFBC;
+  --math-b:#F47D7D;
+  --math-area:#B19CFF;
+  --font-chinese:"PingFang SC","Hiragino Sans GB",sans-serif;
+  --font-math:"Helvetica Neue",Arial,sans-serif;
+}
+/* Explicit local faces stop automatic web-font substitution in the render compiler. */
+@font-face {font-family:"PingFang SC";src:local("PingFangSC-Regular");font-weight:400}
+@font-face {font-family:"PingFang SC";src:local("PingFangSC-Semibold");font-weight:600}
+@font-face {font-family:"PingFang SC";src:local("PingFangSC-Semibold");font-weight:700}
+@font-face {font-family:"Helvetica Neue";src:local("HelveticaNeue-Medium");font-weight:500}
+@font-face {font-family:"Helvetica Neue";src:local("HelveticaNeue-Bold");font-weight:600}
+.var-a {color:var(--math-a);fill:var(--math-a)}
+.var-b {color:var(--math-b);fill:var(--math-b)}
+.math-neutral {color:var(--math-white);fill:var(--math-white)}
+.edge-label {font-family:var(--font-math);font-style:normal;font-weight:500}
+.coordinate-plane {font-family:var(--font-math)}
+.axis-line {fill:none;stroke:var(--math-muted);stroke-width:2}
+.axis-grid {fill:none;stroke:var(--math-muted);stroke-width:1;opacity:.14}
+.axis-number {fill:var(--math-muted);font-size:24px;font-weight:500}
+.axis-name {fill:var(--math-white);font-size:30px;font-weight:500}
+
+*{box-sizing:border-box}body{margin:0;padding:40px;background:var(--math-bg);color:var(--math-white);font-family:var(--font-chinese)}main{max-width:1120px;margin:auto}header{margin-bottom:28px}h1{font-size:32px;margin:0 0 12px}p{color:var(--math-muted);line-height:1.7;margin:0}a{color:var(--math-muted);font-size:14px;text-decoration:none}a:hover{text-decoration:underline}.layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:24px}.stage,aside{border:1px solid #2A3943;border-radius:12px}.stage{display:flex;align-items:center;min-width:0}svg{display:block;width:100%;height:auto}aside{padding:28px 24px}h2{font-size:18px;margin:0 0 28px}label{display:block;margin-bottom:32px}label span{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}output{font-family:var(--font-math);font-weight:500;font-size:22px}input{width:100%;margin:0;cursor:pointer}#base{accent-color:var(--math-a)}#height{accent-color:var(--math-b)}.a{color:var(--math-a)}.b{color:var(--math-b)}button{font:inherit;color:var(--math-white);background:transparent;border:1px solid #35434e;border-radius:8px;padding:10px 16px;cursor:pointer;width:100%}button:hover{border-color:var(--math-white)}button:focus-visible,input:focus-visible{outline:2px solid var(--math-white);outline-offset:5px}.note{font-size:14px;margin:26px 0}footer{margin-top:22px} @media(max-width:720px){body{padding:24px 18px}.layout{grid-template-columns:1fr;gap:16px}h1{font-size:28px}aside{padding:22px}h2{margin-bottom:22px}label{margin-bottom:24px}}
+</style>
+</head>
+<body><main>
+<header><h1>三角形</h1><p>拖动底和高，观察图形与标注一起变化。</p></header>
+<div class="layout">
+<div class="stage"><svg viewBox="0 0 620 460" role="img" aria-labelledby="diagram-title diagram-description">
+<title id="diagram-title">直角三角形 ABC</title><desc id="diagram-description">底边 a、竖边 b、斜边 c，直角位于 C。</desc><g id="triangle-layer"></g>
+</svg></div>
+<aside><h2>调整尺寸</h2>
+<label for="base"><span class="a">底 a <output id="base-value" for="base">5.4</output></span><input id="base" type="range" min="2" max="7.2" step="0.1" value="5.4"></label>
+<label for="height"><span class="b">高 b <output id="height-value" for="height">3.9</output></span><input id="height" type="range" min="2" max="5.4" step="0.1" value="3.9"></label>
+<p class="note">底和高使用相同的长度单位。字母与直角标记始终对应原来的顶点和边。</p>
+<button id="reset" type="button">恢复初始尺寸</button>
+</aside></div>
+<footer><a href="style-board.html">查看四种几何素材样式 →</a></footer>
+</main>
+<script>
+// Coordinates use x right, y down; positive rotation is clockwise in degrees.
+function rigidMatrix({ x = 0, y = 0, rotation = 0, cx = 0, cy = 0, scale = 1 } = {}) {
+  if (![x, y, rotation, cx, cy, scale].every(Number.isFinite) || scale <= 0) {
+    throw new RangeError('Pose must be finite with positive uniform scale');
+  }
+  const angle = rotation * Math.PI / 180;
+  const a = scale * Math.cos(angle), b = scale * Math.sin(angle);
+  const c = -b, d = a;
+  return { a, b, c, d, e: x + cx - a * cx - c * cy, f: y + cy - b * cx - d * cy };
+}
+
+function edgeLabelGeometry({ start, end, outward }, pose = {}, {
+  offset = 18, tick = 8, textGap = 24,
+} = {}) {
+  if (![...start, ...end, ...outward, offset, tick, textGap].every(Number.isFinite) ||
+      [start, end, outward].some(p => p.length !== 2) || Math.min(offset, tick, textGap) < 0) {
+    throw new RangeError('Use finite 2D points and nonnegative label distances');
+  }
+  const dx = end[0] - start[0], dy = end[1] - start[1];
+  const length = Math.hypot(dx, dy), normalLength = Math.hypot(...outward);
+  if (!length || !normalLength || Math.abs(dx * outward[0] + dy * outward[1]) > 1e-9 * length * normalLength) {
+    throw new RangeError('Edge must have length and outward must be a perpendicular nonzero vector');
+  }
+  const m = rigidMatrix(pose);
+  const point = ([x, y]) => [m.a * x + m.c * y + m.e, m.b * x + m.d * y + m.f];
+  const normal = [m.a * outward[0] + m.c * outward[1], m.b * outward[0] + m.d * outward[1]];
+  const magnitude = Math.hypot(...normal);
+  const n = normal.map(v => v / magnitude);
+  const p = point(start), q = point(end);
+  const shift = (p, distance) => p.map((v, i) => v + n[i] * distance);
+  const bracketStart = shift(p, offset), bracketEnd = shift(q, offset);
+  const segment = (p, q) => `M ${p[0]} ${p[1]} L ${q[0]} ${q[1]}`;
+  const path = [segment(bracketStart, bracketEnd),
+    segment(shift(p, offset - tick / 2), shift(p, offset + tick / 2)),
+    segment(shift(q, offset - tick / 2), shift(q, offset + tick / 2))].join(' ');
+  return { edgeStart: p, edgeEnd: q, normal: n, bracketStart, bracketEnd,
+    text: shift(p.map((v, i) => (v + q[i]) / 2), offset + textGap), path };
+}
+
+// Place the layer outside the moving shape group, in the matrix's output coordinates.
+// Update from the SAME pose as the shape on every timeline seek/update.
+function createEdgeLabel(layer, { id, text, edge, ...spacing }) {
+  const doc = layer.ownerDocument;
+  const element = tag => doc.createElementNS('http://www.w3.org/2000/svg', tag);
+  const group = element('g'), bracket = element('path'), label = element('text');
+  group.id = id;
+  group.setAttribute('class', 'edge-label');
+  bracket.setAttribute('fill', 'none');
+  bracket.setAttribute('stroke', 'currentColor');
+  label.setAttribute('fill', 'currentColor');
+  label.setAttribute('text-anchor', 'middle');
+  label.setAttribute('dominant-baseline', 'central');
+  label.textContent = text;
+  group.append(bracket, label);
+  layer.append(group);
+  return {
+    group,
+    update(pose) {
+      const geometry = edgeLabelGeometry(edge, pose, spacing);
+      bracket.setAttribute('d', geometry.path);
+      label.setAttribute('x', geometry.text[0]);
+      label.setAttribute('y', geometry.text[1]);
+      return geometry;
+    },
+  };
+}
+
+
+// C is the lower-left origin; a extends right and b extends upward.
+function createRightTriangle(layer, { id, width, height, x = 0, y = 0 }) {
+  const state = { width, height, x, y };
+  const validate = next => {
+    if (![next.width, next.height, next.x, next.y].every(Number.isFinite) ||
+        next.width <= 0 || next.height <= 0) throw new RangeError('Positive dimensions and finite origin required');
+  };
+  validate(state);
+  const element = (tag, attributes = {}) => {
+    const node = layer.ownerDocument.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
+    return node;
+  };
+  const group = element('g', { id });
+  const shape = element('path', { fill: 'var(--math-area, #B19CFF)', 'fill-opacity': .12,
+    stroke: 'var(--math-area, #B19CFF)', 'stroke-width': 3, 'stroke-linejoin': 'round' });
+  const rightAngle = element('path', { fill: 'none', stroke: 'var(--math-white, #F3F5F7)', 'stroke-width': 2 });
+  group.append(shape, rightAngle);
+  const edges = {
+    a: { start: [0, 0], end: [width, 0], outward: [0, 1] },
+    b: { start: [0, -height], end: [0, 0], outward: [-1, 0] },
+  };
+  const labels = Object.fromEntries(Object.entries(edges).map(([text, edge]) => {
+    const label = createEdgeLabel(group, { id: `${id}-${text}`, text, edge, offset: 24, tick: 10, textGap: 28 });
+    label.group.style.color = `var(--math-${text}, ${text === 'a' ? '#55DFBC' : '#F47D7D'})`;
+    label.group.setAttribute('font-size', 34);
+    label.group.setAttribute('stroke-width', 2);
+    return [text, label];
+  }));
+  const texts = {};
+  for (const name of ['A', 'B', 'C', 'c']) {
+    const node = element('text', { fill: 'var(--math-white, #F3F5F7)',
+      'font-family': 'var(--font-math, "Helvetica Neue", Arial, sans-serif)', 'font-weight': 500,
+      'font-size': name === 'c' ? 34 : 23, 'text-anchor': 'middle', 'dominant-baseline': 'central' });
+    node.textContent = name;
+    texts[name] = node;
+    group.append(node);
+  }
+  function update(next = {}) {
+    const candidate = { ...state, ...next };
+    validate(candidate);
+    Object.assign(state, candidate);
+    const { width: w, height: h, x, y } = state;
+    const c = Math.hypot(w, h), mark = Math.min(21, w / 6, h / 6);
+    group.setAttribute('transform', `translate(${x} ${y})`);
+    shape.setAttribute('d', `M0 ${-h} L${w} 0 L0 0 Z`);
+    rightAngle.setAttribute('d', `M0 ${-mark} H${mark} V0`);
+    edges.a.end = [w, 0];
+    edges.b.start = [0, -h];
+    labels.a.update();
+    labels.b.update();
+    const positions = { A: [-8, -h - 26], B: [w + 23, 8], C: [-27, 20],
+      c: [w / 2 + 38 * h / c, -h / 2 - 38 * w / c] };
+    for (const [name, [tx, ty]] of Object.entries(positions)) {
+      texts[name].setAttribute('x', tx);
+      texts[name].setAttribute('y', ty);
+    }
+    return { width: w, height: h, hypotenuse: c };
+  }
+  update();
+  layer.append(group);
+  return { group, shape, rightAngle, labels, texts, update };
+}
+
+const baseInput=document.getElementById('base'), heightInput=document.getElementById('height');
+const triangle=createRightTriangle(document.getElementById('triangle-layer'),{id:'right-triangle',width:270,height:195,x:160,y:345});
+function refresh(){
+ const a=Number(baseInput.value),b=Number(heightInput.value);
+ triangle.update({width:a*50,height:b*50});
+ document.getElementById('base-value').value=a.toFixed(1);
+ document.getElementById('height-value').value=b.toFixed(1);
+ document.getElementById('diagram-description').textContent=`直角三角形 ABC，底边 a 为 ${a.toFixed(1)}，竖边 b 为 ${b.toFixed(1)}，斜边 c，直角位于 C。`;
+}
+baseInput.addEventListener('input',refresh);heightInput.addEventListener('input',refresh);
+document.getElementById('reset').addEventListener('click',()=>{baseInput.value='5.4';heightInput.value='3.9';refresh()});
+refresh();
+</script></body></html>

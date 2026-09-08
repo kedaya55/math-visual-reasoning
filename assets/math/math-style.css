@@ -1,0 +1,25 @@
+:root {
+  --math-bg:#0B151C;
+  --math-white:#F3F5F7;
+  --math-muted:#AAB6C2;
+  --math-a:#55DFBC;
+  --math-b:#F47D7D;
+  --math-area:#B19CFF;
+  --font-chinese:"PingFang SC","Hiragino Sans GB",sans-serif;
+  --font-math:"Helvetica Neue",Arial,sans-serif;
+}
+/* Explicit local faces stop automatic web-font substitution in the render compiler. */
+@font-face {font-family:"PingFang SC";src:local("PingFangSC-Regular");font-weight:400}
+@font-face {font-family:"PingFang SC";src:local("PingFangSC-Semibold");font-weight:600}
+@font-face {font-family:"PingFang SC";src:local("PingFangSC-Semibold");font-weight:700}
+@font-face {font-family:"Helvetica Neue";src:local("HelveticaNeue-Medium");font-weight:500}
+@font-face {font-family:"Helvetica Neue";src:local("HelveticaNeue-Bold");font-weight:600}
+.var-a {color:var(--math-a);fill:var(--math-a)}
+.var-b {color:var(--math-b);fill:var(--math-b)}
+.math-neutral {color:var(--math-white);fill:var(--math-white)}
+.edge-label {font-family:var(--font-math);font-style:normal;font-weight:500}
+.coordinate-plane {font-family:var(--font-math)}
+.axis-line {fill:none;stroke:var(--math-muted);stroke-width:2}
+.axis-grid {fill:none;stroke:var(--math-muted);stroke-width:1;opacity:.14}
+.axis-number {fill:var(--math-muted);font-size:24px;font-weight:500}
+.axis-name {fill:var(--math-white);font-size:30px;font-weight:500}

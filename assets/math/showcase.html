@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>数学图形 · 组件试用</title>
+<style>
+:root {
+  --math-bg:#0B151C;
+  --math-white:#F3F5F7;
+  --math-muted:#AAB6C2;
+  --math-a:#55DFBC;
+  --math-b:#F47D7D;
+  --math-area:#B19CFF;
+  --font-chinese:"PingFang SC","Hiragino Sans GB",sans-serif;
+  --font-math:"Helvetica Neue",Arial,sans-serif;
+}
+/* Explicit local faces stop automatic web-font substitution in the render compiler. */
+@font-face {font-family:"PingFang SC";src:local("PingFangSC-Regular");font-weight:400}
+@font-face {font-family:"PingFang SC";src:local("PingFangSC-Semibold");font-weight:600}
+@font-face {font-family:"PingFang SC";src:local("PingFangSC-Semibold");font-weight:700}
+@font-face {font-family:"Helvetica Neue";src:local("HelveticaNeue-Medium");font-weight:500}
+@font-face {font-family:"Helvetica Neue";src:local("HelveticaNeue-Bold");font-weight:600}
+.var-a {color:var(--math-a);fill:var(--math-a)}
+.var-b {color:var(--math-b);fill:var(--math-b)}
+.math-neutral {color:var(--math-white);fill:var(--math-white)}
+.edge-label {font-family:var(--font-math);font-style:normal;font-weight:500}
+.coordinate-plane {font-family:var(--font-math)}
+.axis-line {fill:none;stroke:var(--math-muted);stroke-width:2}
+.axis-grid {fill:none;stroke:var(--math-muted);stroke-width:1;opacity:.14}
+.axis-number {fill:var(--math-muted);font-size:24px;font-weight:500}
+.axis-name {fill:var(--math-white);font-size:30px;font-weight:500}
+
+*{box-sizing:border-box}body{margin:0;background:var(--math-bg);color:var(--math-white);font-family:var(--font-chinese);padding:36px 48px}main{max-width:1440px;margin:auto}.eyebrow{font-size:15px;color:var(--math-muted);letter-spacing:2px}h1{font-size:36px;font-weight:700;margin:10px 0 12px}header p{color:var(--math-muted);font-size:17px;line-height:1.7;margin:0}nav{display:flex;gap:10px;margin:26px 0 20px}button{cursor:pointer;font:inherit;color:inherit;background:transparent;border:1px solid #35434e;border-radius:8px;padding:11px 20px}button:hover{border-color:var(--math-white)}button[aria-selected="true"]{background:#22332F;border-color:var(--math-a)}.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px}.stage{border:1px solid #293841;border-radius:12px;overflow:hidden;min-width:0}.stage svg{display:block;width:100%;height:auto}.stage p{margin:0;padding:0 30px 26px;font-size:16px;line-height:1.6;min-height:74px}aside{background:#121F28;border:1px solid #293841;padding:24px;border-radius:12px}aside h2{margin:0 0 8px;font-size:21px}aside p{font-size:14px;line-height:1.6;color:var(--math-muted)}label{display:block;margin:22px 0 0;font-size:15px}label span{display:flex;justify-content:space-between;gap:12px;margin-bottom:11px}output{font-family:var(--font-math);font-weight:500;color:var(--math-white)}input[type="range"]{display:block;width:100%;accent-color:var(--math-a);cursor:pointer}.presets{display:flex;gap:8px;margin:14px 0 22px}.presets button{font:500 15px var(--font-math);flex:1;padding:9px 4px}.result{border-top:1px solid #35434e;padding-top:20px;margin-top:26px}.result .formula{font:500 29px var(--font-math);line-height:1.6}.result .detail{font-size:15px;line-height:1.6}.edge-label{font-size:44px;stroke-width:2px}.edge-label-a,.run-label{color:var(--math-a)}.edge-label-b,.rise-label{color:var(--math-b)}.diagram-note{font:500 25px var(--font-math);fill:var(--math-muted)}[hidden]{display:none!important}footer{color:var(--math-muted);font-size:13px;line-height:1.7;margin-top:20px}.slopeline{stroke:var(--math-area);stroke-width:4;fill:none}.point{fill:var(--math-white);stroke:var(--math-bg);stroke-width:3}.point-label{fill:var(--math-white);font:500 29px var(--font-math)}
+@media(max-width:900px){body{padding:24px 18px}.layout{grid-template-columns:1fr}aside{padding:20px}h1{font-size:28px}nav button{padding:10px 14px}.stage p{padding:0 20px 20px}aside .controls{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}}
+</style></head>
+<body><main>
+<header><div class="eyebrow">数学图形 · 组件试用</div><h1>让图形带着关系一起变化</h1><p>调整参数，看边长、位置和数值怎样保持对应。</p></header>
+<nav role="tablist" aria-label="选择演示"><button id="tab-rectangle" role="tab" aria-selected="true" aria-controls="panel-rectangle">矩形与边长</button><button id="tab-slope" role="tab" aria-selected="false" aria-controls="panel-slope">坐标与斜率</button></nav>
+<section id="panel-rectangle" role="tabpanel" aria-labelledby="tab-rectangle" class="layout">
+ <div class="stage"><svg id="rectangle-svg" viewBox="0 0 960 760" aria-label="可旋转的矩形及跟随物理边的 a、b 标注"><g id="rectangle-shapes"></g><g id="rectangle-labels"></g><text id="rectangle-angle" class="diagram-note" x="480" y="724" text-anchor="middle">0°</text></svg><p>a 始终属于原来的底边，b 始终属于原来的左边。转动图形后，字母保持正立。</p></div>
+ <aside><h2>观察同一条边</h2><p>先试着转过 90°，再改变尺寸或位置。</p><div class="presets" aria-label="常用角度"><button data-angle="0">0°</button><button data-angle="45">45°</button><button data-angle="90">90°</button></div><div class="controls">
+ <label><span>旋转角度 <output id="rotation-value">0°</output></span><input id="rotation" type="range" min="-180" max="180" step="1" value="0"></label>
+ <label><span>边长 a <output id="width-value">320</output></span><input id="width" type="range" min="160" max="360" step="10" value="320"></label>
+ <label><span>边长 b <output id="height-value">200</output></span><input id="height" type="range" min="120" max="300" step="10" value="200"></label>
+ <label><span>显示倍率 <output id="scale-value">1.00×</output></span><input id="scale" type="range" min="0.7" max="1.15" step="0.05" value="1"></label>
+ <label><span>水平位置 <output id="position-value">0</output></span><input id="position" type="range" min="-90" max="90" step="5" value="0"></label></div>
+ <div class="result"><div class="detail">改变边长会改变矩形；显示倍率只改变这张图的观看大小。</div></div>
+ </aside>
+</section>
+<section id="panel-slope" role="tabpanel" aria-labelledby="tab-slope" class="layout" hidden>
+ <div class="stage"><svg id="slope-svg" viewBox="0 0 960 760" aria-label="直线上点 P 的横向增量与纵向增量"><g id="slope-axes"></g><path id="slope-line" class="slopeline"></path><path id="slope-run" fill="none" stroke="#55DFBC" stroke-width="4"></path><path id="slope-rise" fill="none" stroke="#F47D7D" stroke-width="4"></path><g id="slope-labels"></g><circle id="slope-point" class="point" r="9"></circle><text id="slope-point-label" class="point-label" text-anchor="end"></text></svg><p>固定斜率，沿直线移动 P：横向增量与纵向增量一起变化，它们的比值保持不变。</p></div>
+ <aside><h2>为什么看 Δy / Δx？</h2><p>这个比值表示：平均每向右走 1，向上升多少。</p><div class="controls">
+ <label><span>横向增量 Δx <output id="run-value">4</output></span><input id="run" type="range" min="1" max="6" step="0.5" value="4"></label>
+ <label><span>直线斜率 k <output id="slope-value">0.5</output></span><input id="slope" type="range" min="0.25" max="1" step="0.25" value="0.5"></label></div>
+ <div class="result"><div class="formula"><span class="var-b">Δy</span> / <span class="var-a">Δx</span> = k</div><div id="slope-ratio" class="formula">2 / 4 = 0.5</div><p id="point-coordinates" class="detail">P (4, 2)</p><p id="unit-rise" class="detail">每向右走 1，向上升 0.5。</p></div>
+ <p>当前展示第一象限，Δx &gt; 0。这里验证图形与数值的对应，不涵盖全部斜率情形。</p>
+ </aside>
+</section>
+<footer>沿用样片的字体与变量配色。当前只保留已用到的矩形、边长标注、坐标映射和横纵增量。</footer>
+</main><script>
+// Coordinates use x right, y down; positive rotation is clockwise in degrees.
+function rigidMatrix({ x = 0, y = 0, rotation = 0, cx = 0, cy = 0, scale = 1 } = {}) {
+  if (![x, y, rotation, cx, cy, scale].every(Number.isFinite) || scale <= 0) {
+    throw new RangeError('Pose must be finite with positive uniform scale');
+  }
+  const angle = rotation * Math.PI / 180;
+  const a = scale * Math.cos(angle), b = scale * Math.sin(angle);
+  const c = -b, d = a;
+  return { a, b, c, d, e: x + cx - a * cx - c * cy, f: y + cy - b * cx - d * cy };
+}
+
+function edgeLabelGeometry({ start, end, outward }, pose = {}, {
+  offset = 18, tick = 8, textGap = 24,
+} = {}) {
+  if (![...start, ...end, ...outward, offset, tick, textGap].every(Number.isFinite) ||
+      [start, end, outward].some(p => p.length !== 2) || Math.min(offset, tick, textGap) < 0) {
+    throw new RangeError('Use finite 2D points and nonnegative label distances');
+  }
+  const dx = end[0] - start[0], dy = end[1] - start[1];
+  const length = Math.hypot(dx, dy), normalLength = Math.hypot(...outward);
+  if (!length || !normalLength || Math.abs(dx * outward[0] + dy * outward[1]) > 1e-9 * length * normalLength) {
+    throw new RangeError('Edge must have length and outward must be a perpendicular nonzero vector');
+  }
+  const m = rigidMatrix(pose);
+  const point = ([x, y]) => [m.a * x + m.c * y + m.e, m.b * x + m.d * y + m.f];
+  const normal = [m.a * outward[0] + m.c * outward[1], m.b * outward[0] + m.d * outward[1]];
+  const magnitude = Math.hypot(...normal);
+  const n = normal.map(v => v / magnitude);
+  const p = point(start), q = point(end);
+  const shift = (p, distance) => p.map((v, i) => v + n[i] * distance);
+  const bracketStart = shift(p, offset), bracketEnd = shift(q, offset);
+  const segment = (p, q) => `M ${p[0]} ${p[1]} L ${q[0]} ${q[1]}`;
+  const path = [segment(bracketStart, bracketEnd),
+    segment(shift(p, offset - tick / 2), shift(p, offset + tick / 2)),
+    segment(shift(q, offset - tick / 2), shift(q, offset + tick / 2))].join(' ');
+  return { edgeStart: p, edgeEnd: q, normal: n, bracketStart, bracketEnd,
+    text: shift(p.map((v, i) => (v + q[i]) / 2), offset + textGap), path };
+}
+
+// Place the layer outside the moving shape group, in the matrix's output coordinates.
+// Update from the SAME pose as the shape on every timeline seek/update.
+function createEdgeLabel(layer, { id, text, edge, ...spacing }) {
+  const doc = layer.ownerDocument;
+  const element = tag => doc.createElementNS('http://www.w3.org/2000/svg', tag);
+  const group = element('g'), bracket = element('path'), label = element('text');
+  group.id = id;
+  group.setAttribute('class', 'edge-label');
+  bracket.setAttribute('fill', 'none');
+  bracket.setAttribute('stroke', 'currentColor');
+  label.setAttribute('fill', 'currentColor');
+  label.setAttribute('text-anchor', 'middle');
+  label.setAttribute('dominant-baseline', 'central');
+  label.textContent = text;
+  group.append(bracket, label);
+  layer.append(group);
+  return {
+    group,
+    update(pose) {
+      const geometry = edgeLabelGeometry(edge, pose, spacing);
+      bracket.setAttribute('d', geometry.path);
+      label.setAttribute('x', geometry.text[0]);
+      label.setAttribute('y', geometry.text[1]);
+      return geometry;
+    },
+  };
+}
+
+
+// Geometry and edge labels share local coordinates and one pose; layout/timing stay with the scene.
+function createLabeledRectangle(shapeLayer, labelLayer, {
+  id, width, height, color = '#B19CFF', edges = [], pose = {},
+}) {
+  if (![width,height].every(v => Number.isFinite(v) && v > 0)) throw new RangeError('Positive rectangle dimensions required');
+  const doc = shapeLayer.ownerDocument;
+  const element = tag => doc.createElementNS('http://www.w3.org/2000/svg',tag);
+  const group=element('g'), shape=element('g'), rect=element('rect');
+  group.id='area-'+id;shape.id='shape-'+id;rect.id='fill-'+id;
+  for (const [key,value] of Object.entries({width,height,fill:color,'fill-opacity':.18,stroke:color,'stroke-width':3})) rect.setAttribute(key,value);
+  shape.append(rect);group.append(shape);shapeLayer.append(group);
+  const sides={
+    top:{start:[0,0],end:[width,0],outward:[0,-1]},
+    right:{start:[width,0],end:[width,height],outward:[1,0]},
+    bottom:{start:[0,height],end:[width,height],outward:[0,1]},
+    left:{start:[0,0],end:[0,height],outward:[-1,0]},
+  };
+  const labels=edges.map(({side,text,...spacing})=>{
+    if(!sides[side]) throw new RangeError('Unknown rectangle side');
+    const label=createEdgeLabel(labelLayer,{id:`edge-${id}-${text}`,text,edge:sides[side],...spacing});
+    label.group.classList.add('edge-label-'+text);
+    return label;
+  });
+  const state={x:0,y:0,cx:width/2,cy:height/2,rotation:0,scale:1,...pose};
+  function update(next=state) {
+    Object.assign(state,next);
+    const m=rigidMatrix(state);
+    shape.setAttribute('transform',`matrix(${m.a} ${m.b} ${m.c} ${m.d} ${m.e} ${m.f})`);
+    return labels.map(label=>label.update(state));
+  }
+  update();
+  return {group,shape,rect,labels,pose:state,width,height,update};
+}
+
+// A linear, equally scaled Cartesian frame. Plot content and timing belong to its caller.
+function coordinateMap({origin=[0,0],unit=1}={}) {
+  if(origin.length!==2||![...origin,unit].every(Number.isFinite)||unit<=0) throw new RangeError('Finite origin and positive unit required');
+  return ([x,y])=>{
+    if(![x,y].every(Number.isFinite)) throw new RangeError('Finite coordinates required');
+    return [origin[0]+x*unit,origin[1]-y*unit];
+  };
+}
+function createCoordinatePlane(layer,{id='axes',origin=[110,650],unit=80,xMax=6,yMax=6}={}) {
+  if(![xMax,yMax].every(n=>Number.isInteger(n)&&n>0&&n<=20)) throw new RangeError('Use positive integer axis limits up to 20');
+  const toScreen=coordinateMap({origin,unit});
+  const group=layer.ownerDocument.createElementNS('http://www.w3.org/2000/svg','g');group.id=id;group.setAttribute('class','coordinate-plane');layer.append(group);
+  const add=(tag,attrs,text)=>{const e=layer.ownerDocument.createElementNS(group.namespaceURI,tag);for(const [k,v]of Object.entries(attrs))e.setAttribute(k,v);if(text!==undefined)e.textContent=text;group.append(e);return e;};
+  const [ox,oy]=origin,xx=ox+xMax*unit,yy=oy-yMax*unit;
+  for(let x=1;x<=xMax;x++){
+    const px=ox+x*unit;
+    add('path',{d:`M${px} ${oy}V${yy}`,class:'axis-grid'});
+    add('path',{d:`M${px} ${oy-6}V${oy+6}`,class:'axis-line'});
+    add('text',{x:px,y:oy+34,'text-anchor':'middle',class:'axis-number'},x);
+  }
+  for(let y=1;y<=yMax;y++){
+    const py=oy-y*unit;
+    add('path',{d:`M${ox} ${py}H${xx}`,class:'axis-grid'});
+    add('path',{d:`M${ox-6} ${py}H${ox+6}`,class:'axis-line'});
+    add('text',{x:ox-24,y:py+8,'text-anchor':'end',class:'axis-number'},y);
+  }
+  add('path',{d:`M${ox} ${yy-26}V${oy}H${xx+26}M${ox-8} ${yy-14}L${ox} ${yy-26}L${ox+8} ${yy-14}M${xx+14} ${oy-8}L${xx+26} ${oy}L${xx+14} ${oy+8}`,class:'axis-line'});
+  add('text',{x:ox-20,y:oy+34,'text-anchor':'end',class:'axis-number'},'0');
+  add('text',{x:xx+45,y:oy+9,class:'axis-name'},'x');
+  add('text',{x:ox-8,y:yy-45,class:'axis-name'},'y');
+  return {group,toScreen};
+}
+function riseRun(start,end) {
+  if(![start,end].every(p=>p.length===2&&p.every(Number.isFinite))) throw new RangeError('Finite 2D points required');
+  const dx=end[0]-start[0],dy=end[1]-start[1];
+  return {dx,dy,slope:dx===0?null:dy/dx};
+}
+
+const $=id=>document.getElementById(id);
+const number=id=>Number($(id).value);
+const fmt=n=>Number(n.toFixed(3)).toString();
+let rectangle;
+function updateRectangle(){
+ const width=number('width'),height=number('height'),rotation=number('rotation'),scale=number('scale'),position=number('position');
+ if(!rectangle||rectangle.width!==width||rectangle.height!==height){
+  $('rectangle-shapes').replaceChildren();$('rectangle-labels').replaceChildren();
+  rectangle=createLabeledRectangle($('rectangle-shapes'),$('rectangle-labels'),{id:'demo',width,height,edges:[{side:'bottom',text:'a'},{side:'left',text:'b'}]});
+ }
+ rectangle.update({x:480-width/2+position,y:350-height/2,cx:width/2,cy:height/2,rotation,scale});
+ $('rectangle-angle').textContent=rotation+'°';
+ for(const id of ['rotation','width','height','scale','position'])$(id+'-value').textContent=id==='rotation'?rotation+'°':id==='scale'?scale.toFixed(2)+'×':number(id);
+}
+for(const id of ['rotation','width','height','scale','position'])$(id).addEventListener('input',updateRectangle);
+for(const b of document.querySelectorAll('[data-angle]'))b.addEventListener('click',()=>{$('rotation').value=b.dataset.angle;updateRectangle();});
+const plane=createCoordinatePlane($('slope-axes'),{id:'demo-axes',origin:[150,610],unit:80,xMax:6,yMax:6});
+const runEdge={start:[150,610],end:[470,610],outward:[0,1]},riseEdge={start:[470,610],end:[470,450],outward:[1,0]};
+const runLabel=createEdgeLabel($('slope-labels'),{id:'demo-dx',text:'Δx = 4',edge:runEdge,offset:46,textGap:32});runLabel.group.classList.add('run-label');
+const riseLabel=createEdgeLabel($('slope-labels'),{id:'demo-dy',text:'Δy = 2',edge:riseEdge,offset:24,textGap:96});riseLabel.group.classList.add('rise-label');
+function updateSlope(){
+ const dx=number('run'),k=number('slope'),end=[dx,dx*k],relation=riseRun([0,0],end);
+ const start=plane.toScreen([0,0]),foot=plane.toScreen([dx,0]),point=plane.toScreen(end),lineEnd=plane.toScreen([6,6*k]);
+ $('slope-line').setAttribute('d',`M${start}L${lineEnd}`);$('slope-run').setAttribute('d',`M${start}L${foot}`);$('slope-rise').setAttribute('d',`M${foot}L${point}`);
+ runEdge.start=start;runEdge.end=foot;riseEdge.start=foot;riseEdge.end=point;
+ runLabel.group.querySelector('text').textContent='Δx = '+fmt(relation.dx);riseLabel.group.querySelector('text').textContent='Δy = '+fmt(relation.dy);runLabel.update();riseLabel.update();
+ $('slope-point').setAttribute('cx',point[0]);$('slope-point').setAttribute('cy',point[1]);
+ $('slope-point-label').setAttribute('x',point[0]-18);$('slope-point-label').setAttribute('y',point[1]-24);$('slope-point-label').textContent='P';$('point-coordinates').textContent=`P (${fmt(end[0])}, ${fmt(end[1])})`;
+ $('run-value').textContent=fmt(dx);$('slope-value').textContent=fmt(k);$('slope-ratio').textContent=`${fmt(relation.dy)} / ${fmt(relation.dx)} = ${fmt(relation.slope)}`;
+ $('unit-rise').textContent=`每向右走 1，向上升 ${fmt(relation.slope)}。`;
+}
+$('run').addEventListener('input',updateSlope);$('slope').addEventListener('input',updateSlope);
+for(const name of ['rectangle','slope'])$('tab-'+name).addEventListener('click',()=>{
+ for(const other of ['rectangle','slope']){$('tab-'+other).setAttribute('aria-selected',String(name===other));$('panel-'+other).hidden=name!==other;}
+});
+updateRectangle();updateSlope();
+</script></body></html>

@@ -1,0 +1,4 @@
+interface:
+  display_name: "数学推理动画"
+  short_description: "把数学知识点变成对象连续变化、推理清楚、视觉简洁的教学动画视频"
+  default_prompt: "使用 $math-visual-reasoning，把完全平方公式制作成连续、简洁的数学推理动画，重点解释为什么会出现两个 ab。"
