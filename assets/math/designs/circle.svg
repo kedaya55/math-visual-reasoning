@@ -1,0 +1,20 @@
+<svg id="circle" class="diagram" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" width="560" height="330" role="img" aria-label="以 O 为圆心，半径为 r 的圆">
+<style>
+.diagram{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:500}
+.shape{fill:#B19CFF;fill-opacity:.12;stroke:#B19CFF;stroke-width:3;stroke-linejoin:round}
+.measure{fill:none;stroke-width:2;stroke-linecap:round}
+.length-a{fill:#55DFBC}.length-b{fill:#F47D7D}.neutral{fill:#F3F5F7}
+.line-a{stroke:#55DFBC}.line-b{stroke:#F47D7D}.line-neutral{stroke:#F3F5F7}
+.variable{font-size:34px;text-anchor:middle;dominant-baseline:central}
+.vertex{font-size:23px;text-anchor:middle;dominant-baseline:central;fill:#F3F5F7}
+.axis{stroke:#AAB6C2;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.grid{stroke:#AAB6C2;stroke-width:1;opacity:.14;fill:none}
+.tick-text{fill:#AAB6C2;font-size:19px;text-anchor:middle;dominant-baseline:central}
+.axis-letter{fill:#F3F5F7;font-size:29px;text-anchor:middle;dominant-baseline:central}
+</style>
+<title>圆形素材样式</title>
+<circle class="shape" cx="280" cy="164" r="110"/>
+<path class="measure line-a" d="M280 164 H390"/>
+<circle class="neutral" cx="280" cy="164" r="4"/>
+<text class="vertex" x="260" y="188">O</text><text class="variable length-a" x="335" y="137">r</text>
+</svg>

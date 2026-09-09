@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>圆形 · 交互预览</title>
+<style>
+/* SHARED_STYLES */
+*{box-sizing:border-box}body{margin:0;padding:40px;background:var(--math-bg);color:var(--math-white);font-family:var(--font-chinese)}main{max-width:1120px;margin:auto}header{margin-bottom:28px}h1{font-size:32px;margin:0 0 12px}p{color:var(--math-muted);line-height:1.7;margin:0}a{color:var(--math-muted);font-size:14px;text-decoration:none}a:hover{text-decoration:underline}.layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:24px}.stage,aside{border:1px solid #2A3943;border-radius:12px}.stage{display:flex;align-items:center;min-width:0}svg{display:block;width:100%;height:auto}aside{padding:28px 24px}h2{font-size:18px;margin:0 0 28px}label{display:block;margin-bottom:32px}label span{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}output{font-family:var(--font-math);font-weight:500;font-size:22px}input{width:100%;margin:0;cursor:pointer}#radius{accent-color:var(--math-a)}.a{color:var(--math-a)}.b{color:var(--math-b)}button{font:inherit;color:var(--math-white);background:transparent;border:1px solid #35434e;border-radius:8px;padding:10px 16px;cursor:pointer;width:100%}button:hover{border-color:var(--math-white)}button:focus-visible,input:focus-visible{outline:2px solid var(--math-white);outline-offset:5px}.note{font-size:14px;margin:26px 0}footer{margin-top:22px} @media(max-width:720px){body{padding:24px 18px}.layout{grid-template-columns:1fr;gap:16px}h1{font-size:28px}aside{padding:22px}h2{margin-bottom:22px}label{margin-bottom:24px}}
+</style>
+</head>
+<body><main>
+<header><h1>圆形</h1><p>拖动半径，观察圆周、半径线与标注一起变化。</p></header>
+<div class="layout">
+<div class="stage"><svg viewBox="0 0 620 460" role="img" aria-labelledby="diagram-title diagram-description">
+<title id="diagram-title">圆心为 O、半径为 r 的圆</title><desc id="diagram-description">半径线从圆心 O 延伸至圆周。</desc><g id="circle-layer"></g>
+</svg></div>
+<aside><h2>调整尺寸</h2>
+<label for="radius"><span class="a">半径 r <output id="radius-value" for="radius">2.2</output></span><input id="radius" type="range" min="1" max="3.6" step="0.1" value="2.2"></label>
+<p class="note">圆心 O 保持不动。半径线始终连接圆心与圆周，r 标在半径线中点的上方。</p>
+<button id="reset" type="button">恢复初始半径</button>
+</aside></div>
+<footer><a href="style-board.html">查看四种几何素材样式 →</a></footer>
+</main>
+<script>
+/* COMPONENT_SOURCES */
+const radiusInput=document.getElementById('radius');
+const circle=createLabeledCircle(document.getElementById('circle-layer'),{id:'labeled-circle',radius:110,x:310,y:230});
+function refresh(){
+ const r=Number(radiusInput.value);
+ circle.update({radius:r*50});
+ document.getElementById('radius-value').value=r.toFixed(1);
+ document.getElementById('diagram-description').textContent=`圆心为 O 的圆，半径 r 为 ${r.toFixed(1)}，半径线从圆心延伸至圆周。`;
+}
+radiusInput.addEventListener('input',refresh);
+document.getElementById('reset').addEventListener('click',()=>{radiusInput.value='2.2';refresh()});
+refresh();
+</script></body></html>

@@ -1,0 +1,20 @@
+<svg id="rectangle" class="diagram" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" width="560" height="330" role="img" aria-label="底边 a、竖边 b 的矩形">
+<style>
+.diagram{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:500}
+.shape{fill:#B19CFF;fill-opacity:.12;stroke:#B19CFF;stroke-width:3;stroke-linejoin:round}
+.measure{fill:none;stroke-width:2;stroke-linecap:round}
+.length-a{fill:#55DFBC}.length-b{fill:#F47D7D}.neutral{fill:#F3F5F7}
+.line-a{stroke:#55DFBC}.line-b{stroke:#F47D7D}.line-neutral{stroke:#F3F5F7}
+.variable{font-size:34px;text-anchor:middle;dominant-baseline:central}
+.vertex{font-size:23px;text-anchor:middle;dominant-baseline:central;fill:#F3F5F7}
+.axis{stroke:#AAB6C2;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.grid{stroke:#AAB6C2;stroke-width:1;opacity:.14;fill:none}
+.tick-text{fill:#AAB6C2;font-size:19px;text-anchor:middle;dominant-baseline:central}
+.axis-letter{fill:#F3F5F7;font-size:29px;text-anchor:middle;dominant-baseline:central}
+</style>
+<title>矩形素材样式</title>
+<rect class="shape" x="150" y="75" width="270" height="185"/>
+<path class="measure line-a" d="M150 279 V289 M150 284 H420 M420 279 V289"/>
+<path class="measure line-b" d="M121 75 H131 M126 75 V260 M121 260 H131"/>
+<text class="variable length-a" x="285" y="312">a</text><text class="variable length-b" x="98" y="167.5">b</text>
+</svg>

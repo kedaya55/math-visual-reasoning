@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>三角形 · 交互预览</title>
+<style>
+/* SHARED_STYLES */
+*{box-sizing:border-box}body{margin:0;padding:40px;background:var(--math-bg);color:var(--math-white);font-family:var(--font-chinese)}main{max-width:1120px;margin:auto}header{margin-bottom:28px}h1{font-size:32px;margin:0 0 12px}p{color:var(--math-muted);line-height:1.7;margin:0}a{color:var(--math-muted);font-size:14px;text-decoration:none}a:hover{text-decoration:underline}.layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:24px}.stage,aside{border:1px solid #2A3943;border-radius:12px}.stage{display:flex;align-items:center;min-width:0}svg{display:block;width:100%;height:auto}aside{padding:28px 24px}h2{font-size:18px;margin:0 0 28px}label{display:block;margin-bottom:32px}label span{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}output{font-family:var(--font-math);font-weight:500;font-size:22px}input{width:100%;margin:0;cursor:pointer}#base{accent-color:var(--math-a)}#height{accent-color:var(--math-b)}.a{color:var(--math-a)}.b{color:var(--math-b)}button{font:inherit;color:var(--math-white);background:transparent;border:1px solid #35434e;border-radius:8px;padding:10px 16px;cursor:pointer;width:100%}button:hover{border-color:var(--math-white)}button:focus-visible,input:focus-visible{outline:2px solid var(--math-white);outline-offset:5px}.note{font-size:14px;margin:26px 0}footer{margin-top:22px} @media(max-width:720px){body{padding:24px 18px}.layout{grid-template-columns:1fr;gap:16px}h1{font-size:28px}aside{padding:22px}h2{margin-bottom:22px}label{margin-bottom:24px}}
+</style>
+</head>
+<body><main>
+<header><h1>三角形</h1><p>拖动底和高，观察图形与标注一起变化。</p></header>
+<div class="layout">
+<div class="stage"><svg viewBox="0 0 620 460" role="img" aria-labelledby="diagram-title diagram-description">
+<title id="diagram-title">直角三角形 ABC</title><desc id="diagram-description">底边 a、竖边 b、斜边 c，直角位于 C。</desc><g id="triangle-layer"></g>
+</svg></div>
+<aside><h2>调整尺寸</h2>
+<label for="base"><span class="a">底 a <output id="base-value" for="base">5.4</output></span><input id="base" type="range" min="2" max="7.2" step="0.1" value="5.4"></label>
+<label for="height"><span class="b">高 b <output id="height-value" for="height">3.9</output></span><input id="height" type="range" min="2" max="5.4" step="0.1" value="3.9"></label>
+<p class="note">底和高使用相同的长度单位。字母与直角标记始终对应原来的顶点和边。</p>
+<button id="reset" type="button">恢复初始尺寸</button>
+</aside></div>
+<footer><a href="style-board.html">查看四种几何素材样式 →</a></footer>
+</main>
+<script>
+/* COMPONENT_SOURCES */
+const baseInput=document.getElementById('base'), heightInput=document.getElementById('height');
+const triangle=createRightTriangle(document.getElementById('triangle-layer'),{id:'right-triangle',width:270,height:195,x:160,y:345});
+function refresh(){
+ const a=Number(baseInput.value),b=Number(heightInput.value);
+ triangle.update({width:a*50,height:b*50});
+ document.getElementById('base-value').value=a.toFixed(1);
+ document.getElementById('height-value').value=b.toFixed(1);
+ document.getElementById('diagram-description').textContent=`直角三角形 ABC，底边 a 为 ${a.toFixed(1)}，竖边 b 为 ${b.toFixed(1)}，斜边 c，直角位于 C。`;
+}
+baseInput.addEventListener('input',refresh);heightInput.addEventListener('input',refresh);
+document.getElementById('reset').addEventListener('click',()=>{baseInput.value='5.4';heightInput.value='3.9';refresh()});
+refresh();
+</script></body></html>

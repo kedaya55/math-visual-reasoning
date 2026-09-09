@@ -1,8 +1,8 @@
 # 新增组件接口
 
-后续课程补充见 [EXPANSION-API.md](../assets/math/EXPANSION-API.md)；本文保留原有组件接口。
+后续课程补充见 [EXPANSION-API.md](EXPANSION-API.md)；本文保留原有组件接口。
 
-[覆盖范围](../assets/math/COVERAGE.md) · [离线预览](../assets/math/library-preview.html)
+[覆盖范围](COVERAGE.md) · [离线预览](library-preview.html)
 
 ## 公共使用方式
 
@@ -70,6 +70,6 @@ function setProgress(progress) {
 - 函数每条曲线 20–4000 个采样间隔；预览使用 400，反比例 a ≠ 0，x = 0 时观察点返回 `y:null`。
 - 概率树最多 200 节点、8 层；同一节点下概率和容差为 1e−9。大树不会自动放大布局，本次视觉验证为两次不放回取球。
 - 图表支持 1–40 个非负值，扇形图必须有正总量；本次视觉验证为 4 类。长分类名、多点重合或更密集数据需题目调整布局。
-- 字体、标签间距与任意组合参数的避让不是自动保证。已验证范围见 [LIBRARY-QA.md](../assets/math/LIBRARY-QA.md)。
+- 字体、标签间距与任意组合参数的避让不是自动保证。已验证范围见 [LIBRARY-QA.md](LIBRARY-QA.md)。
 
 重建离线预览：`node components/math/build-library-preview.mjs`。必要模型检查：`node --test components/math/tests/library.test.mjs`。

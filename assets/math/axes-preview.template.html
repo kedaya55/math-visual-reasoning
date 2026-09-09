@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>坐标轴 · 交互预览</title>
+<style>
+/* SHARED_STYLES */
+*{box-sizing:border-box}body{margin:0;padding:40px;background:var(--math-bg);color:var(--math-white);font-family:var(--font-chinese)}main{max-width:1120px;margin:auto}header{margin-bottom:28px}h1{font-size:32px;margin:0 0 12px}p{color:var(--math-muted);line-height:1.7;margin:0}a{color:var(--math-muted);font-size:14px;text-decoration:none}a:hover{text-decoration:underline}.layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:24px}.stage,aside{border:1px solid #2A3943;border-radius:12px}.stage{display:flex;align-items:center;min-width:0}svg{display:block;width:100%;height:auto}aside{padding:28px 24px}h2{font-size:18px;margin:0 0 28px}label{display:block;margin-bottom:32px}label span{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}output{font-family:var(--font-math);font-weight:500;font-size:22px}input{width:100%;margin:0;cursor:pointer}input{accent-color:var(--math-muted)}.a{color:var(--math-a)}.b{color:var(--math-b)}button{font:inherit;color:var(--math-white);background:transparent;border:1px solid #35434e;border-radius:8px;padding:10px 16px;cursor:pointer;width:100%}button:hover{border-color:var(--math-white)}button:focus-visible,input:focus-visible{outline:2px solid var(--math-white);outline-offset:5px}.note{font-size:14px;margin:26px 0}footer{margin-top:22px} @media(max-width:720px){body{padding:24px 18px}.layout{grid-template-columns:1fr;gap:16px}h1{font-size:28px}aside{padding:22px}h2{margin-bottom:22px}label{margin-bottom:24px}}
+.axis-number{font-size:19px}.axis-name{font-size:29px;fill:var(--math-white)}.axis-grid{opacity:.14}.axis-line{stroke-linecap:round;stroke-linejoin:round}output{font-size:18px}
+</style>
+</head>
+<body><main>
+<header><h1>坐标轴</h1><p>调整范围与间距，观察刻度和网格同步变化。</p></header>
+<div class="layout">
+<div class="stage"><svg viewBox="0 0 620 520" role="img" aria-labelledby="diagram-title diagram-description">
+<title id="diagram-title">平面直角坐标系</title><desc id="diagram-description">包含正负方向，x、y 轴使用相同刻度间距。</desc><g id="axes-layer"></g>
+</svg></div>
+<aside><h2>调整坐标轴</h2>
+<label for="x-range"><span>x 轴范围 <output id="x-value" for="x-range">−3 ～ 3</output></span><input id="x-range" type="range" min="2" max="4" step="1" value="3"></label>
+<label for="y-range"><span>y 轴范围 <output id="y-value" for="y-range">−2 ～ 2</output></span><input id="y-range" type="range" min="1" max="3" step="1" value="2"></label>
+<label for="spacing"><span>刻度间距 <output id="spacing-value" for="spacing">50</output></span><input id="spacing" type="range" min="45" max="55" step="1" value="50"></label>
+<p class="note">原点保持不动，两轴每一格都代表 1，横纵方向使用相同的间距。</p>
+<button id="reset" type="button">恢复初始设置</button>
+</aside></div>
+<footer><a href="style-board.html">查看四种几何素材样式 →</a></footer>
+</main>
+<script>
+/* COMPONENT_SOURCES */
+const xInput=document.getElementById('x-range'),yInput=document.getElementById('y-range'),spacingInput=document.getElementById('spacing');
+const plane=createCoordinatePlane(document.getElementById('axes-layer'),{id:'coordinate-axes',origin:[290,280],unit:50,xMin:-3,xMax:3,yMin:-2,yMax:2});
+function refresh(){
+ const x=Number(xInput.value),y=Number(yInput.value),unit=Number(spacingInput.value);
+ plane.update({xMin:-x,xMax:x,yMin:-y,yMax:y,unit});
+ document.getElementById('x-value').value=`−${x} ～ ${x}`;
+ document.getElementById('y-value').value=`−${y} ～ ${y}`;
+ document.getElementById('spacing-value').value=String(unit);
+ document.getElementById('diagram-description').textContent=`平面直角坐标系，x 轴从负 ${x} 到 ${x}，y 轴从负 ${y} 到 ${y}，横纵刻度间距相同。`;
+}
+for(const input of [xInput,yInput,spacingInput])input.addEventListener('input',refresh);
+document.getElementById('reset').addEventListener('click',()=>{xInput.value='3';yInput.value='2';spacingInput.value='50';refresh()});
+refresh();
+</script></body></html>

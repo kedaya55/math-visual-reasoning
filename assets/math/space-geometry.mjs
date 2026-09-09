@@ -1,0 +1,25 @@
+import {createDiagram,diagramPolygon,diagramLine,diagramText,diagramDot} from './diagram.mjs';
+import {finite,positive,mathColors as C,pathPoints} from './svg-helpers.mjs';
+export const v3add=(a,b)=>a.map((v,i)=>v+b[i]);
+export const v3sub=(a,b)=>a.map((v,i)=>v-b[i]);
+export const v3scale=(a,s)=>a.map(v=>v*s);
+export const v3dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0);
+export const v3cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+export const v3length=a=>Math.hypot(...a);
+export function point3(p){if(!Array.isArray(p)||p.length!==3)throw new RangeError('3D point required');finite(p);return p;}
+export function rotateAroundAxis(p,a,b,angle){[p,a,b].forEach(point3);finite([angle]);const axis=v3sub(b,a),len=v3length(axis);positive([len]);const u=v3scale(axis,1/len),v=v3sub(p,a),c=Math.cos(angle),s=Math.sin(angle);return v3add(a,v3add(v3add(v3scale(v,c),v3scale(v3cross(u,v),s)),v3scale(u,v3dot(u,v)*(1-c))));}
+export function cameraModel({yaw=-25,pitch=25,origin=[490,280],target=[0,0,0],unit=48}={}){
+ finite([yaw,pitch,...origin]);point3(target);positive([unit]);if(origin.length!==2||pitch< -90||pitch>90)throw new RangeError('Valid orthographic camera required');const a=yaw*Math.PI/180,b=pitch*Math.PI/180,ca=Math.cos(a),sa=Math.sin(a),cb=Math.cos(b),sb=Math.sin(b),view=[sa*cb,sb,ca*cb],project=p=>{point3(p);const v=v3sub(p,target),depth=v[0]*sa+v[2]*ca;return[origin[0]+unit*(v[0]*ca-v[2]*sa),origin[1]+unit*(-v[1]*cb+depth*sb),v[1]*sb+depth*cb]};return{project,view,yaw,pitch,origin,target,unit};
+}
+function shade(hex,amount){if(!/^#[0-9a-f]{6}$/i.test(hex))return hex;return'#'+[1,3,5].map(i=>Math.round(parseInt(hex.slice(i,i+2),16)*amount).toString(16).padStart(2,'0')).join('');}
+export function spaceSceneModel({faces=[],lines=[],markers=[],camera={},wireframe=false,showHidden=true}={}){
+ if(faces.length>4000||lines.length>1000||markers.length>200)throw new RangeError('Scene exceeds component limits');const cam=cameraModel(camera),projected=[],triangles=[],items=[];
+ for(const face of faces){if(!face.id||!face.points||face.points.length<3)throw new RangeError('Faces require stable IDs and vertices');face.points.forEach(point3);const p=face.points.map(cam.project),normal=v3cross(v3sub(face.points[1],face.points[0]),v3sub(face.points[2],face.points[0])),len=v3length(normal);if(len<1e-10)continue;const front=v3dot(normal,cam.view)>=-1e-10,depth=p.reduce((s,q)=>s+q[2]/p.length,0);projected.push({...face,projected:p,front,depth,normal:v3scale(normal,1/len)});for(let i=1;i<p.length-1;i++)triangles.push([p[0],p[i],p[i+1]]);}
+ projected.sort((a,b)=>a.depth-b.depth||a.id.localeCompare(b.id));for(const f of projected){const brightness=.25+.22*Math.abs(v3dot(f.normal,[-.35,.72,.6]));items.push(diagramPolygon('face/'+f.id,f.projected.map(p=>p.slice(0,2)),f.color??C.green,{fill:shade(f.color??C.green,brightness),'fill-opacity':1,stroke:wireframe?shade(f.color??C.green,.7):shade(f.color??C.green,brightness),'stroke-width':wireframe?1.3:.65}));}
+ // Compare camera depth at a projected point against the triangulated surface.
+ const hidden=p=>triangles.some(([a,b,c])=>{const det=(b[1]-c[1])*(a[0]-c[0])+(c[0]-b[0])*(a[1]-c[1]);if(Math.abs(det)<1e-10)return false;const u=((b[1]-c[1])*(p[0]-c[0])+(c[0]-b[0])*(p[1]-c[1]))/det,v=((c[1]-a[1])*(p[0]-c[0])+(a[0]-c[0])*(p[1]-c[1]))/det,w=1-u-v;return u> -1e-7&&v> -1e-7&&w> -1e-7&&u*a[2]+v*b[2]+w*c[2]>p[2]+1e-5;});
+ const projectedLines=[];for(const line of lines){if(!line.id||!Array.isArray(line.points)||line.points.length<2||line.points.length>2000)throw new RangeError('Line requires ID and 2–2000 points');line.points.forEach(point3);const p=line.points.map(cam.project),visible=[],back=[];for(let i=0;i<p.length-1;i++){const mid=p[i].map((v,j)=>(v+p[i+1][j])/2),isHidden=line.occlusion===false?false:hidden(mid);(isHidden?back:visible).push([p[i].slice(0,2),p[i+1].slice(0,2)]);}const color=line.color??C.white;items.push({id:'line/'+line.id,tag:'path',attrs:{d:visible.map(s=>pathPoints(s)).join(' '),fill:'none',stroke:color,'stroke-width':line.width??3,'stroke-linecap':'round'}});items.push({id:'hidden/'+line.id,tag:'path',attrs:{d:showHidden&&line.hidden!=='hide'?back.map(s=>pathPoints(s)).join(' '):'',fill:'none',stroke:color,'stroke-width':line.width??2,'stroke-dasharray':'6 5','stroke-opacity':.45}});projectedLines.push({...line,visible,hidden:back});}
+ for(const marker of markers){point3(marker.point);const p=cam.project(marker.point),isHidden=hidden(p),opacity=isHidden?(showHidden?.5:0):1,offset=marker.offset??[18,-18];finite(offset);items.push(diagramDot('point/'+marker.id,p[0],p[1],marker.color??C.white,5,{opacity:marker.dot===false?0:opacity}));items.push(diagramText('label/'+marker.id,marker.label??marker.id,p[0]+offset[0],p[1]+offset[1],marker.color??C.white,23,{opacity}));}
+ return{items,faces:projected,lines:projectedLines,camera:cam,isHidden:hidden,project:cam.project};
+}
+export function createSpaceScene(layer,options={}){return createDiagram(layer,options,spaceSceneModel,'space-scene');}

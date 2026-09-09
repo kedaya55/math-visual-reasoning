@@ -1,0 +1,21 @@
+<svg id="axes" class="diagram" viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" width="560" height="330" role="img" aria-label="等比例刻度的 x、y 坐标轴，包含正负方向和原点">
+<style>
+.diagram{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:500}
+.shape{fill:#B19CFF;fill-opacity:.12;stroke:#B19CFF;stroke-width:3;stroke-linejoin:round}
+.measure{fill:none;stroke-width:2;stroke-linecap:round}
+.length-a{fill:#55DFBC}.length-b{fill:#F47D7D}.neutral{fill:#F3F5F7}
+.line-a{stroke:#55DFBC}.line-b{stroke:#F47D7D}.line-neutral{stroke:#F3F5F7}
+.variable{font-size:34px;text-anchor:middle;dominant-baseline:central}
+.vertex{font-size:23px;text-anchor:middle;dominant-baseline:central;fill:#F3F5F7}
+.axis{stroke:#AAB6C2;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.grid{stroke:#AAB6C2;stroke-width:1;opacity:.14;fill:none}
+.tick-text{fill:#AAB6C2;font-size:19px;text-anchor:middle;dominant-baseline:central}
+.axis-letter{fill:#F3F5F7;font-size:29px;text-anchor:middle;dominant-baseline:central}
+</style>
+<title>坐标轴素材样式</title>
+<path class="grid" d="M90 55 V255 M140 55 V255 M190 55 V255 M240 55 V255 M290 55 V255 M340 55 V255 M390 55 V255 M440 55 V255 M90 55 H440 M90 105 H440 M90 155 H440 M90 205 H440 M90 255 H440"/>
+<path class="axis" d="M70 205 H488 M476 198 L488 205 L476 212 M240 292 V30 M233 42 L240 30 L247 42"/>
+<path class="axis" d="M90 201 V209 M140 201 V209 M190 201 V209 M290 201 V209 M340 201 V209 M390 201 V209 M440 201 V209 M236 55 H244 M236 105 H244 M236 155 H244 M236 255 H244"/>
+<g class="tick-text"><text x="90" y="227">−3</text><text x="140" y="227">−2</text><text x="190" y="227">−1</text><text x="290" y="227">1</text><text x="340" y="227">2</text><text x="390" y="227">3</text><text x="440" y="227">4</text><text x="217" y="227">0</text><text x="217" y="55">3</text><text x="217" y="105">2</text><text x="217" y="155">1</text><text x="217" y="255">−1</text></g>
+<text class="axis-letter" x="509" y="205">x</text><text class="axis-letter" x="240" y="12">y</text>
+</svg>
